@@ -1,0 +1,12 @@
+<div class="catalogue-item" *ngFor="let item of catalogueItems; let i = index">
+    <div>
+        <div>{{i}}</div>
+    </div>
+    <div>
+        <div>{{ item.category.name }}</div>
+        <div>{{ item.name }}</div>
+    </div>
+    <div>
+        <div>{{ item.price }}</div>
+    </div>
+</div>

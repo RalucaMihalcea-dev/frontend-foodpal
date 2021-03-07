@@ -126,5 +126,8 @@
       }
     }
   },
-  "defaultProject": "food-pal"
+  "defaultProject": "food-pal",
+  "cli": {
+    "analytics": false
+  }
 }

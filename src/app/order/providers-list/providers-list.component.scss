@@ -1,0 +1,28 @@
+:host {
+  background: inherit;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 2fr 2fr 2fr;
+  height: 100%;
+  background: inherit;
+
+
+  .feed-me {
+    width:100px; 
+    margin-left: 245px;
+  }
+  
+  .card {
+    color: #0f0f0f;
+    margin: 0 0 32px 32px;
+    max-width: 340px;
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+  }
+}
