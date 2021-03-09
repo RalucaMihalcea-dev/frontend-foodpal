@@ -1,4 +1,3 @@
-import { ProviderCatalogue } from './provider-catalogue';
 import { ProviderCategory } from './provider-category';
 
 export class Provider {
@@ -6,7 +5,7 @@ export class Provider {
   name: string;
   description: string;
   location: string;
-  customerId: number = 1;
-  catalogue: ProviderCatalogue;
+  customerId: number;
+
   category?: ProviderCategory;
 }
