@@ -1,3 +1,4 @@
+import { ProviderCatalogue } from './provider-catalogue';
 import { ProviderCategory } from './provider-category';
 
 export class Provider {
@@ -8,4 +9,5 @@ export class Provider {
   customerId: number;
 
   category?: ProviderCategory;
+  catalogue?: Array<ProviderCatalogue>;
 }

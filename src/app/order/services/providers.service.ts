@@ -1,11 +1,11 @@
-import { Observable } from 'rxjs';
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Provider } from 'src/app/order/models/provider';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { CatalogueItem } from '../models/catalogue-item';
+import { Provider } from '../models/provider';
 
 @Injectable()
-export class OrdersService {
+export class ProvidersService {
   constructor(private http: HttpClient) {}
 
   getAllProviders(): Observable<Array<Provider>> {
