@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -7,7 +7,9 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 import { Provider } from '../models/provider';
 import { ProvidersService } from '../services/providers.service';
@@ -19,7 +21,8 @@ import { ProvidersService } from '../services/providers.service';
 })
 export class ProviderEditComponent implements OnInit {
   data$: Observable<Provider>;
-
+  selectedId: number;
+  
   formGroup: FormGroup;
   nameFormControl: FormControl;
 
@@ -33,14 +36,16 @@ export class ProviderEditComponent implements OnInit {
 
   constructor(
     private providerSvc: ProvidersService,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.initForm();
-    this.data$ = this.providerSvc.getProvider(1).pipe(
-      tap((data) => {
-        this.fillForm(data);
+    this.data$ = this.route.paramMap.pipe(
+      switchMap(params => {
+        this.selectedId = Number(params.get('id'));
+        return this.providerSvc.getProvider(this.selectedId);
       })
     );
   }
@@ -112,3 +117,5 @@ export class ProviderEditComponent implements OnInit {
     });
   }
 }
+
+
