@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { forkJoin, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap, switchMap } from 'rxjs/operators';
 import { Provider } from '../models/provider';
 import { ItemStatus } from '../models/provider-catalogue';
 
@@ -29,6 +29,7 @@ export class ProvidersService {
     data.catalogue.items
       .filter((f) => f.status === ItemStatus.Added)
       ?.forEach((menuItem) => {
+        menuItem.category = { id: 1, name: 'Desserts' };
         menuItemRequests.push(this.http.post(menuUrl, menuItem));
       });
     data.catalogue.items
@@ -43,10 +44,11 @@ export class ProvidersService {
       ?.forEach((menuItem) => {
         menuItemRequests.push(this.http.delete(`${menuUrl}/${menuItem.id}`));
       });
+      data.customerId = 1;
 
     return this.http
       .put(`${this.providerUrl}/${id}`, data)
-      .pipe(tap(() => forkJoin(menuItemRequests).subscribe()));
+      .pipe(switchMap(() => forkJoin(menuItemRequests)));
   }
 
   getMenuUrl = (id: number) => `http://localhost:5000/api/providers/${id}/menu`;

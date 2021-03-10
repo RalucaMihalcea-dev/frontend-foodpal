@@ -19,6 +19,10 @@ const routes: Routes = [
         path: 'providers/first',
         component: ProviderEditComponent,
       },
+      {
+        path: 'providers/:id',
+        component: ProviderEditComponent,
+      },
     ],
   },
 ];

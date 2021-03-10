@@ -1,5 +1,7 @@
+import { CatalogueItem } from './../models/provider-catalogue';
 import { Component, OnInit } from '@angular/core';
 import {
+  AbstractControl,
   FormArray,
   FormBuilder,
   FormControl,
@@ -8,10 +10,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { combineLatest, Observable, Subject } from 'rxjs';
+import { skip, startWith, switchMap } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 import { Provider } from '../models/provider';
+import { ItemStatus } from '../models/provider-catalogue';
 import { ProvidersService } from '../services/providers.service';
 
 @Component({
@@ -21,6 +24,7 @@ import { ProvidersService } from '../services/providers.service';
 })
 export class ProviderEditComponent implements OnInit {
   data$: Observable<Provider>;
+  data: Provider;
   selectedId: number;
   
   formGroup: FormGroup;
@@ -42,21 +46,24 @@ export class ProviderEditComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
+    this.initData();
+  }
+
+  initData() {
     this.data$ = this.route.paramMap.pipe(
       switchMap(params => {
         this.selectedId = Number(params.get('id'));
         return this.providerSvc.getProvider(this.selectedId);
-      })
+      }),
+      tap(provider => {this.fillForm(provider);
+      this.data = provider;})
     );
   }
 
   initForm() {
-    this.nameFormControl = new FormControl(
-      {
-        value: '',
-        updateOn: 'blur',
-      },
-      [Validators.required, Validators.minLength(5), Validators.maxLength(150)]
+    this.nameFormControl = new FormControl('',
+      { validators: [Validators.required, Validators.minLength(5), Validators.maxLength(150)],
+      updateOn: 'blur'}
     );
 
     this.catalogItems = new FormArray([]);
@@ -66,7 +73,7 @@ export class ProviderEditComponent implements OnInit {
       name: this.nameFormControl,
       description: new FormControl(),
       location: new FormControl(),
-      providerCatalogue: new FormGroup({
+      catalogue: new FormGroup({
         id: new FormControl(),
         description: new FormControl(),
         items: this.catalogItems,
@@ -80,17 +87,24 @@ export class ProviderEditComponent implements OnInit {
     this.formGroup.get('description').setValue(data.description);
     this.formGroup.get('location').setValue(data.location);
     this.formGroup
-      .get('providerCatalogue.description')
+      .get('catalogue.description')
       .setValue(data.catalogue.description);
-    this.formGroup.get('providerCatalogue.id').setValue(data.catalogue.id);
+    this.formGroup.get('catalogue.id').setValue(data.catalogue.id);
     data.catalogue?.items?.forEach((item) => {
-      (this.formGroup.get('providerCatalogue.items') as FormArray).push(
+      const name = new FormControl(item.name, {updateOn: 'blur'});
+      const price = new FormControl(item.price, {updateOn: 'blur'});
+      const status = new FormControl(ItemStatus.Initial);
+
+      combineLatest([name.valueChanges.pipe(startWith('')), price.valueChanges.pipe(startWith(''))]).pipe(skip(1)).subscribe(([n,p]) => {status.setValue(ItemStatus.Updated); console.log('updated')});
+      (this.formGroup.get('catalogue.items') as FormArray).push(
         new FormGroup({
           id: new FormControl(item.id),
-          name: new FormControl(item.name),
-          price: new FormControl(item.price),
+          name,
+          price,
+          status
         })
       );
+
     });
   }
 
@@ -98,9 +112,35 @@ export class ProviderEditComponent implements OnInit {
     if (this.formGroup.valid) {
       const form = this.formGroup.value;
       console.log('new name: ', form);
+      
+      this.providerSvc.updateProvider(form.id, form).subscribe(() => {
+        this.initForm();
+        this.initData();
+      });
     } else {
       this.getFormValidationErrors();
     }
+  }
+
+  addNewMenuItem(){
+    this.catalogItems.push(this.formBuilder.group({
+      name: new FormControl(),
+      price: new FormControl(),
+      status: new FormControl(ItemStatus.Added)
+    }));
+  }
+
+  deleteMenuItem(control : AbstractControl) {
+    const itemStatus = control.get('status');
+
+    if(itemStatus.value !== ItemStatus.Added)
+      itemStatus.setValue(ItemStatus.Deleted);
+      else
+      this.catalogItems.removeAt(this.catalogItems.controls.findIndex(c => c == control));
+  }
+
+  filteredItems(){
+    return this.catalogItems.controls.filter(c => c.get('status').value != ItemStatus.Deleted);
   }
 
   getFormValidationErrors() {

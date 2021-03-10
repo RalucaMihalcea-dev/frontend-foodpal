@@ -23,7 +23,7 @@
           </mat-form-field>
         </div>
       </div>
-      <div class="column lg" formGroupName="providerCatalogue">
+      <div class="column lg" formGroupName="catalogue">
         <div class="row">
           <mat-form-field appearance="outline" color="accent" class="fill">
             <mat-label>Description</mat-label>
@@ -38,7 +38,7 @@
           <h3>Menu Items</h3>
           <div class="container">
             <div
-              *ngFor="let control of catalogItems.controls"
+              *ngFor="let control of filteredItems(); let i = index"
               class="menu-item row"
             >
               <div class="menu-item-name column">
@@ -73,6 +73,9 @@
                   />
                 </mat-form-field>
               </div>
+              <div class="menu-item-name column">
+                <button class="deleteButton" mat-raised-button color="warn" (click)="deleteMenuItem(control)">Delete</button>
+              </div>
             </div>
           </div>
         </div>
@@ -81,7 +84,11 @@
 
     <div class="row actions">
       <button mat-raised-button color="accent" (click)="save()">Save</button>
+      <button mat-raised-button color="accent" (click)="addNewMenuItem()">Add new menu item</button>
+     
+      
     </div>
+    
   </form>
 </div>
 <ng-template #loading> Loading... </ng-template>
